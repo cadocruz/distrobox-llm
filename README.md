@@ -14,7 +14,7 @@ Ansible playbooks to reproducibly build an Arch-based distrobox named `llm` for 
 
 ## Layout
 
-- Distrobox home: `/mnt/data/distrobox/llm` (kept off snapshots; holds pip caches, ollama models, lmstudio conversations).
+- Distrobox home: `/mnt/data/distrobox/llm` (kept off snapshots; holds pip caches, ollama models, lmstudio conversations). Configurable via `dl_data_root` / `dl_box_home` in `ansible/group_vars/all/main.yml` — change it if you don't have `/mnt/data`.
 - Repo with ansible definitions: `~/Projects/distrobox-llm`.
 
 ## Two-track maintenance
@@ -82,4 +82,4 @@ That creates a `.desktop` on the host that wraps the distrobox-enter call.
 
 ## Why this repo exists
 
-See `~/.config/.docs/package-inventory.md` (the my-omarchy-config repo) for the package-audit that led to this separation.
+Host-side CUDA + cuDNN + ML tooling has a wide blast radius: every CUDA major bump risks breaking the host Python ecosystem, and the NVIDIA stack is the largest single source of long `pacman -Syu` runs. Moving it all into a distrobox means the host stays small and fast, the CUDA stack can be rebuilt or rolled back independently, and backups can exclude the multi-GB model caches cleanly.
