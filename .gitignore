@@ -1,0 +1,6 @@
+*.log
+*.retry
+*.tar
+*.tar.zst
+__pycache__/
+.ansible/

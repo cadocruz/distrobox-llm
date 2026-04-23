@@ -1,0 +1,28 @@
+---
+# Installs pacman base + yay. Idempotent.
+
+- name: Sync pacman DB inside the box
+  ansible.builtin.command: "{{ dl_in_box }} sudo pacman -Syu --noconfirm"
+  register: _pacman_sync
+  changed_when: "'there is nothing to do' not in _pacman_sync.stdout | lower"
+
+- name: Install base toolchain for yay
+  ansible.builtin.command: "{{ dl_in_box }} sudo pacman -S --needed --noconfirm base-devel git"
+  register: _base
+  changed_when: "'reinstalling' in _base.stdout or 'installing' in _base.stdout"
+
+- name: Check if yay is installed inside the box
+  ansible.builtin.shell: "{{ dl_in_box }} bash -c 'command -v yay'"
+  register: _yay_check
+  changed_when: false
+  failed_when: false
+
+- name: Clone yay-bin
+  ansible.builtin.command: >-
+    {{ dl_in_box }} bash -lc 'cd /tmp && rm -rf yay-bin && git clone --depth=1 https://aur.archlinux.org/yay-bin.git'
+  when: _yay_check.rc != 0
+
+- name: Build + install yay-bin
+  ansible.builtin.command: >-
+    {{ dl_in_box }} bash -lc 'cd /tmp/yay-bin && makepkg -si --noconfirm'
+  when: _yay_check.rc != 0

@@ -1,0 +1,21 @@
+---
+# Packages installed inside the distrobox.
+# Official repo packages (installed via pacman).
+dl_pacman_packages:
+  - base-devel
+  - git
+  - curl
+  - wget
+  - cuda
+  - cudnn          # cuDNN; pytorch wheels need it
+  - python
+  - python-pip
+  - ffmpeg         # whisper.cpp / audio pipelines
+  - spirv-headers  # required to compile libggml-cuda-git (whisper.cpp-cuda dep)
+  - vulkan-headers # same; both needed by ggml's Vulkan backend build
+  - glslang        # GLSL → SPIR-V compiler, build dep of libggml-cuda-git
+
+# AUR packages (installed via yay; all binary-preferred variants).
+dl_aur_packages:
+  - ollama-cuda        # Ollama with CUDA build (binary)
+  - whisper.cpp-cuda   # whisper.cpp CUDA build (binary)

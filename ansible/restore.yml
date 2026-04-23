@@ -1,0 +1,47 @@
+---
+- name: Restore distrobox-llm from a tar.zst archive
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars_prompt:
+    - name: restore_archive
+      prompt: "Path to llm-YYYYMMDDTHHMMSS.tar.zst archive"
+      private: false
+  tasks:
+    - name: Assert archive exists
+      ansible.builtin.stat:
+        path: "{{ restore_archive }}"
+      register: _archive
+      failed_when: not _archive.stat.exists
+
+    - name: Stop container (if running)
+      ansible.builtin.command: "distrobox stop -Y {{ dl_box_name }}"
+      failed_when: false
+      changed_when: false
+
+    - name: Remove container (keep home untouched)
+      ansible.builtin.command: "distrobox rm -f {{ dl_box_name }}"
+      failed_when: false
+      changed_when: false
+
+    - name: Wipe box home (destructive!)
+      ansible.builtin.file:
+        path: "{{ dl_box_home }}"
+        state: absent
+
+    - name: Recreate box home
+      ansible.builtin.file:
+        path: "{{ dl_box_home }}"
+        state: directory
+        mode: "0755"
+
+    - name: Extract archive
+      ansible.builtin.command: "tar --zstd -xf {{ restore_archive }} -C {{ dl_box_home }}"
+      changed_when: true
+
+    - name: Re-run site.yml to rebuild the container wrapper
+      ansible.builtin.debug:
+        msg: >-
+          Archive extracted to {{ dl_box_home }}. Now run:
+          `ansible-playbook site.yml` to recreate the distrobox container
+          around the restored home.

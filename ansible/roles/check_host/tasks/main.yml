@@ -1,0 +1,31 @@
+---
+- name: Ensure distrobox is installed on the host
+  ansible.builtin.command: which distrobox
+  register: _distrobox_bin
+  changed_when: false
+  failed_when: _distrobox_bin.rc != 0
+
+- name: Detect container runtime (podman preferred, docker fallback)
+  ansible.builtin.command: "which {{ item }}"
+  loop: [podman, docker]
+  register: _runtime_check
+  changed_when: false
+  failed_when: false
+
+- name: Require at least one container runtime
+  ansible.builtin.assert:
+    that:
+      - _runtime_check.results[0].rc == 0 or _runtime_check.results[1].rc == 0
+    fail_msg: "Neither podman nor docker is installed. Install one on the host."
+
+- name: Check NVIDIA is usable from the host
+  ansible.builtin.command: nvidia-smi --query-gpu=name --format=csv,noheader
+  register: _nvidia_smi
+  changed_when: false
+  failed_when: _nvidia_smi.rc != 0
+  when: dl_nvidia_enabled
+
+- name: Report detected GPU
+  ansible.builtin.debug:
+    msg: "Host GPU: {{ _nvidia_smi.stdout | default('(nvidia disabled)') }}"
+  when: dl_nvidia_enabled

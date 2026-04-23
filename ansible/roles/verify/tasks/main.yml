@@ -1,0 +1,41 @@
+---
+- name: Verify nvidia-smi works inside the box
+  ansible.builtin.command: "{{ dl_in_box }} nvidia-smi --query-gpu=name --format=csv,noheader"
+  register: _box_nvidia
+  changed_when: false
+  failed_when: _box_nvidia.rc != 0
+  when: dl_nvidia_enabled
+
+- name: Verify CUDA compiler is present
+  ansible.builtin.shell: "{{ dl_in_box }} bash -lc 'command -v nvcc'"
+  register: _nvcc
+  changed_when: false
+  failed_when: _nvcc.rc != 0
+
+- name: Verify ollama binary
+  ansible.builtin.shell: "{{ dl_in_box }} bash -lc 'command -v ollama'"
+  register: _ollama
+  changed_when: false
+  failed_when: _ollama.rc != 0
+
+- name: Verify whisper.cpp binary
+  ansible.builtin.shell: "{{ dl_in_box }} bash -lc 'command -v whisper-cli || command -v whisper-cpp'"
+  register: _whisper
+  changed_when: false
+  failed_when: _whisper.rc != 0
+
+- name: Verify LM Studio AppImage
+  ansible.builtin.stat:
+    path: "{{ dl_lmstudio_dest }}"
+  register: _lmstudio_final
+  failed_when: not _lmstudio_final.stat.exists
+
+- name: Summary
+  ansible.builtin.debug:
+    msg:
+      - "Box: {{ dl_box_name }} at {{ dl_box_home }}"
+      - "GPU: {{ _box_nvidia.stdout | default('(disabled)') }}"
+      - "nvcc: {{ _nvcc.stdout | trim }}"
+      - "ollama: {{ _ollama.stdout | trim }}"
+      - "whisper: {{ _whisper.stdout | trim }}"
+      - "LM Studio: {{ dl_lmstudio_dest }}"

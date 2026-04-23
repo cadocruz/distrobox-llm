@@ -1,0 +1,37 @@
+---
+- name: Ensure box home directory exists
+  ansible.builtin.file:
+    path: "{{ dl_box_home }}"
+    state: directory
+    mode: "0755"
+
+- name: Check if distrobox exists
+  ansible.builtin.shell: "distrobox list 2>/dev/null | awk '{print $3}' | grep -qx {{ dl_box_name }}"
+  register: _box_exists
+  changed_when: false
+  failed_when: false
+
+- name: Create distrobox
+  ansible.builtin.command: >-
+    distrobox create
+    --name {{ dl_box_name }}
+    --image {{ dl_image }}
+    --home {{ dl_box_home }}
+    {{ '--nvidia' if dl_nvidia_enabled else '' }}
+  when: _box_exists.rc != 0
+
+- name: Initialize box (first-run setup inside container)
+  ansible.builtin.command: "distrobox enter {{ dl_box_name }} -- true"
+  when: _box_exists.rc != 0
+  changed_when: _box_exists.rc != 0
+
+- name: Verify box UID matches host
+  ansible.builtin.shell: "{{ dl_in_box }} id -u"
+  register: _box_uid
+  changed_when: false
+
+- name: Assert UID
+  ansible.builtin.assert:
+    that:
+      - _box_uid.stdout | trim == (ansible_user_id | default('akitaonrails') | string) or _box_uid.stdout | trim == '1026'
+    fail_msg: "Box UID {{ _box_uid.stdout }} does not match host user. Recreate the box."

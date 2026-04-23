@@ -1,0 +1,12 @@
+---
+- name: Install pacman packages inside the box
+  ansible.builtin.command: >-
+    {{ dl_in_box }} sudo pacman -S --needed --noconfirm {{ dl_pacman_packages | join(' ') }}
+  register: _pacman_install
+  changed_when: "'installing' in _pacman_install.stdout or 'upgrading' in _pacman_install.stdout"
+
+- name: Install AUR packages inside the box (via yay)
+  ansible.builtin.command: >-
+    {{ dl_in_box }} yay -S --needed --noconfirm {{ dl_aur_packages | join(' ') }}
+  register: _aur_install
+  changed_when: "'installing' in _aur_install.stdout or 'upgrading' in _aur_install.stdout"

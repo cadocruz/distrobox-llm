@@ -1,0 +1,20 @@
+---
+# Core distrobox-llm variables.
+
+dl_box_name: llm
+dl_image: "archlinux:latest"
+
+# Distrobox --home path (persistent across container recreations).
+# Keeps the box contained to /mnt/data so host /home stays small and
+# snapshot scope stays sane.
+dl_data_root: "/mnt/data"
+dl_box_home: "{{ dl_data_root }}/distrobox/{{ dl_box_name }}"
+
+# NVIDIA passthrough (cuda, ollama-cuda, whisper.cpp-cuda, lmstudio all use it).
+dl_nvidia_enabled: true
+
+# Backup artefacts
+dl_backup_dir: "{{ dl_box_home }}/backups"
+
+# Helper: run a command inside the box as the user, non-interactive.
+dl_in_box: "distrobox enter {{ dl_box_name }} --"

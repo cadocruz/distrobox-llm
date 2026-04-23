@@ -1,0 +1,12 @@
+---
+- name: Full distrobox-llm setup
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  roles:
+    - { role: check_host,          tags: [check] }
+    - { role: create_box,          tags: [create, bootstrap] }
+    - { role: bootstrap_packages,  tags: [bootstrap] }
+    - { role: install_packages,    tags: [configure, packages] }
+    - { role: install_appimages,   tags: [configure, apps] }
+    - { role: verify,              tags: [verify] }

@@ -1,0 +1,27 @@
+---
+- name: Ensure AppImage directory exists
+  ansible.builtin.file:
+    path: "{{ dl_appimage_dir }}"
+    state: directory
+    mode: "0755"
+
+- name: Check current LM Studio AppImage version (if present)
+  ansible.builtin.stat:
+    path: "{{ dl_lmstudio_dest }}"
+  register: _lmstudio_stat
+
+- name: Download LM Studio AppImage
+  ansible.builtin.get_url:
+    url: "{{ dl_lmstudio_url }}"
+    dest: "{{ dl_lmstudio_dest }}"
+    mode: "0755"
+    force: "{{ not _lmstudio_stat.stat.exists }}"
+    timeout: 120
+  register: _lmstudio_dl
+  when: not _lmstudio_stat.stat.exists
+
+- name: Verify AppImage is executable
+  ansible.builtin.file:
+    path: "{{ dl_lmstudio_dest }}"
+    mode: "0755"
+    state: file

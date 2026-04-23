@@ -1,0 +1,41 @@
+---
+- name: Backup distrobox-llm
+  hosts: localhost
+  connection: local
+  gather_facts: true
+  vars:
+    backup_timestamp: "{{ ansible_facts.date_time.iso8601_basic_short }}"
+  tasks:
+    - name: Create backup directory
+      ansible.builtin.file:
+        path: "{{ dl_backup_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Stop distrobox container
+      ansible.builtin.command: "distrobox stop -Y {{ dl_box_name }}"
+      failed_when: false
+      changed_when: false
+
+    - name: Archive the box home (excludes backups + huge model/data dirs)
+      ansible.builtin.command: >-
+        tar --exclude='./backups'
+            --exclude='./.local/share/ollama/models'
+            --exclude='./.lmstudio/models'
+            --exclude='./.cache'
+            -cf {{ dl_backup_dir }}/llm-{{ backup_timestamp }}.tar
+            -C {{ dl_box_home }} .
+      changed_when: true
+
+    - name: Compress with zstd
+      ansible.builtin.command: "zstd -T0 -10 --rm {{ dl_backup_dir }}/llm-{{ backup_timestamp }}.tar"
+      changed_when: true
+
+    - name: Show backup
+      ansible.builtin.shell: "ls -lh {{ dl_backup_dir }}/llm-{{ backup_timestamp }}.tar.zst"
+      register: _result
+      changed_when: false
+
+    - name: Result
+      ansible.builtin.debug:
+        msg: "{{ _result.stdout }}"
