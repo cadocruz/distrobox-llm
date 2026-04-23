@@ -14,17 +14,24 @@ Ansible playbooks for reproducibly creating and configuring an Arch-based distro
 
 ## Commands
 
-All run from `ansible/`:
+Routine maintenance (no ansible needed):
+```sh
+bin/llm-update                         # yay -Syu inside the box
+bin/llm-enter                          # enter the box shell
+```
 
+Ansible (from `ansible/`) — for declared-state reconciliation, not routine updates:
 ```sh
 ansible-playbook site.yml              # full setup from scratch
 ansible-playbook site.yml --tags bootstrap  # just create box + install yay
-ansible-playbook site.yml --tags packages   # install/update pacman + AUR pkgs
+ansible-playbook site.yml --tags packages   # reconcile pacman + AUR package lists
 ansible-playbook site.yml --tags apps       # (re-)download AppImages
 ansible-playbook site.yml --tags verify     # assertions only
 ansible-playbook backup.yml
 ansible-playbook restore.yml -e restore_archive=<path>
 ```
+
+Rule of thumb: if you edited `group_vars/all/*.yml`, run ansible. Otherwise `llm-update` is faster and simpler.
 
 ## Key invariants
 

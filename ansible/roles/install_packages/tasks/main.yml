@@ -1,12 +1,28 @@
 ---
+# Pre-install a jack provider so ffmpeg's jack dep doesn't prompt.
+- name: Pre-install jack provider (pipewire-jack)
+  ansible.builtin.command: >-
+    {{ dl_in_box }} sudo pacman -S --needed --noconfirm pipewire-jack
+  register: _jack
+  changed_when: "'installing' in _jack.stdout"
+
+# Distrobox --nvidia bind-mounts host NVIDIA userspace over /usr/lib/
+# /usr/bin/ /etc/OpenCL/ etc. inside the container, so every pacman/AUR
+# package that tries to place a file at an NVIDIA-owned path conflicts.
+# Per distrobox's own NVIDIA compatibility docs, --overwrite "*" is the
+# intended pattern for --nvidia containers. Safe: bind-mounts win at
+# runtime regardless of what pacman records.
 - name: Install pacman packages inside the box
   ansible.builtin.command: >-
-    {{ dl_in_box }} sudo pacman -S --needed --noconfirm {{ dl_pacman_packages | join(' ') }}
+    {{ dl_in_box }} sudo pacman -S --needed --noconfirm --overwrite '*'
+    {{ dl_pacman_packages | join(' ') }}
   register: _pacman_install
   changed_when: "'installing' in _pacman_install.stdout or 'upgrading' in _pacman_install.stdout"
 
 - name: Install AUR packages inside the box (via yay)
   ansible.builtin.command: >-
-    {{ dl_in_box }} yay -S --needed --noconfirm {{ dl_aur_packages | join(' ') }}
+    {{ dl_in_box }} yay -S --needed --noconfirm --overwrite '*'
+    --answerdiff=None --answeredit=None --answerclean=None
+    {{ dl_aur_packages | join(' ') }}
   register: _aur_install
   changed_when: "'installing' in _aur_install.stdout or 'upgrading' in _aur_install.stdout"

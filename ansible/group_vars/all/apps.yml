@@ -1,12 +1,12 @@
 ---
 # AppImages downloaded and placed inside the distrobox home.
-# Each entry: dest filename + URL. Bump dl_lmstudio_version when you want
-# the install_appimages role to refresh it.
+# Bump dl_lmstudio_version when you want install_appimages to refresh it.
+# URL pattern comes from the AUR `lmstudio` PKGBUILD — domain is
+# installers.lmstudio.ai (not releases), path /linux/x64 (not /linux/x86).
+# pkgver 0.3.35.1 gets transformed to URL segment 0.3.35-1.
 
 dl_appimage_dir: "{{ dl_box_home }}/Apps"
 
-# LM Studio — fetch the current AppImage. Version string is what lmstudio.ai
-# uses in its URL paths; verify at https://lmstudio.ai/download before bumping.
 dl_lmstudio_version: "0.3.35-1"
-dl_lmstudio_url: "https://releases.lmstudio.ai/linux/x86/{{ dl_lmstudio_version }}/LM-Studio-{{ dl_lmstudio_version }}-x64.AppImage"
+dl_lmstudio_url: "https://installers.lmstudio.ai/linux/x64/{{ dl_lmstudio_version }}/LM-Studio-{{ dl_lmstudio_version }}-x64.AppImage"
 dl_lmstudio_dest: "{{ dl_appimage_dir }}/LM-Studio.AppImage"

@@ -1,0 +1,21 @@
+#!/bin/bash
+# Sync pacman + AUR to latest inside the llm distrobox.
+#
+# Use this for routine updates. For package-list changes (added/removed
+# a package in group_vars/all/packages.yml), re-run the ansible playbook
+# instead: `ansible-playbook site.yml --tags packages`.
+
+set -e
+
+BOX="${DL_BOX_NAME:-llm}"
+
+# --overwrite '*' is required on --nvidia containers — see install_packages role.
+distrobox enter "$BOX" -- sudo pacman -Syu --noconfirm --overwrite '*'
+distrobox enter "$BOX" -- yay -Syu --needed --noconfirm --overwrite '*' \
+    --answerdiff=None --answeredit=None --answerclean=None
+
+# Trim old versions, keep one.
+distrobox enter "$BOX" -- sudo paccache -rk1
+
+echo ""
+echo "Updated. Verify with: ansible-playbook site.yml --tags verify"

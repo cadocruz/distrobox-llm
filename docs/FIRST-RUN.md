@@ -44,6 +44,14 @@ bin/llm-enter
 distrobox enter llm
 ```
 
+## Day-to-day: keeping the box fresh
+
+```sh
+bin/llm-update                    # routine yay -Syu inside the box
+```
+
+Use this instead of `ansible-playbook` for routine updates. Ansible is only needed when you change what's *declared* in `ansible/group_vars/all/packages.yml` or `apps.yml` — see the `README.md` "Two-track maintenance" table.
+
 Inside:
 ```sh
 nvidia-smi                         # GPU visible?

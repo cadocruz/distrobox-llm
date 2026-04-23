@@ -17,11 +17,25 @@ Ansible playbooks to reproducibly build an Arch-based distrobox named `llm` for 
 - Distrobox home: `/mnt/data/distrobox/llm` (kept off snapshots; holds pip caches, ollama models, lmstudio conversations).
 - Repo with ansible definitions: `~/Projects/distrobox-llm`.
 
+## Two-track maintenance
+
+| Task | Tool | Why |
+|------|------|-----|
+| Weekly / routine "sync everything to latest" | `bin/llm-update` | Direct `yay -Syu` inside the box — ansible would just shell out to the same command with ~2 s of Python init on top. |
+| You edited `group_vars/all/packages.yml` (added/removed a package) | `ansible-playbook site.yml --tags packages` | Reconciles the box against the declared state. |
+| Fresh install / full recreate | `ansible-playbook site.yml` | Box creation + yay bootstrap + packages + AppImages + verify. |
+| Post-update sanity check | `ansible-playbook site.yml --tags verify` | Confirms nvcc, ollama, whisper, GPU visibility. |
+| Backup / restore | `ansible-playbook backup.yml` / `restore.yml` | Archives the box home, excluding huge model dirs. |
+
+Mental model: **ansible = declared-state convergence**, **`yay -Syu` = already-declared-state freshness**.
+
 ## Quickstart
+
+First-time setup (see `docs/FIRST-RUN.md` for prerequisites):
 
 ```sh
 cd ansible
-ansible-playbook site.yml              # full setup from scratch
+ansible-playbook site.yml              # ~15-30 min (cuda build is heavy)
 ```
 
 Partial runs via tags:
@@ -29,9 +43,15 @@ Partial runs via tags:
 ```sh
 ansible-playbook site.yml --tags check         # preflight only
 ansible-playbook site.yml --tags bootstrap     # create box + install yay
-ansible-playbook site.yml --tags packages      # refresh pacman + AUR packages
-ansible-playbook site.yml --tags apps          # re-download AppImages
+ansible-playbook site.yml --tags packages      # reconcile pacman + AUR package lists
+ansible-playbook site.yml --tags apps          # re-download AppImages (e.g. bumped dl_lmstudio_version)
 ansible-playbook site.yml --tags verify        # post-setup assertions
+```
+
+Routine updates:
+
+```sh
+bin/llm-update                         # yay -Syu inside the box, + paccache trim
 ```
 
 Backup / restore:
