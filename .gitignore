@@ -4,3 +4,5 @@
 *.tar.zst
 __pycache__/
 .ansible/
+.lobster/
+.claude/
