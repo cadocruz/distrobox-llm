@@ -5,23 +5,39 @@
     state: directory
     mode: "0755"
 
-- name: Check current LM Studio AppImage version (if present)
+- name: Check if specific version of LM Studio AppImage exists
   ansible.builtin.stat:
-    path: "{{ dl_lmstudio_dest }}"
-  register: _lmstudio_stat
+    path: "{{ dl_lmstudio_versioned_dest }}"
+  register: _lmstudio_versioned_stat
 
 - name: Download LM Studio AppImage
   ansible.builtin.get_url:
     url: "{{ dl_lmstudio_url }}"
-    dest: "{{ dl_lmstudio_dest }}"
+    dest: "{{ dl_lmstudio_versioned_dest }}"
     mode: "0755"
-    force: "{{ not _lmstudio_stat.stat.exists }}"
-    timeout: 120
-  register: _lmstudio_dl
-  when: not _lmstudio_stat.stat.exists
+    timeout: 300
+  when: not _lmstudio_versioned_stat.stat.exists
 
 - name: Verify AppImage is executable
   ansible.builtin.file:
-    path: "{{ dl_lmstudio_dest }}"
+    path: "{{ dl_lmstudio_versioned_dest }}"
     mode: "0755"
     state: file
+
+- name: Link LM-Studio.AppImage to current version
+  ansible.builtin.file:
+    src: "{{ dl_lmstudio_versioned_dest }}"
+    dest: "{{ dl_lmstudio_dest }}"
+    state: link
+    force: yes
+
+- name: Check if OpenCode is installed
+  ansible.builtin.stat:
+    path: "{{ dl_opencode_bin }}"
+  register: _opencode_stat
+
+- name: Install OpenCode inside the container
+  ansible.builtin.command: >-
+    {{ dl_in_box }} bash -c 'curl -fsSL {{ dl_opencode_url }} | bash'
+  when: not _opencode_stat.stat.exists
+

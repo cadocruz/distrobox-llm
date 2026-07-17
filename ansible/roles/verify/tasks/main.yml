@@ -30,6 +30,12 @@
   register: _lmstudio_final
   failed_when: not _lmstudio_final.stat.exists
 
+- name: Verify OpenCode binary
+  ansible.builtin.stat:
+    path: "{{ dl_opencode_bin }}"
+  register: _opencode_final
+  failed_when: not _opencode_final.stat.exists
+
 - name: Summary
   ansible.builtin.debug:
     msg:
@@ -39,3 +45,4 @@
       - "ollama: {{ _ollama.stdout | trim }}"
       - "whisper: {{ _whisper.stdout | trim }}"
       - "LM Studio: {{ dl_lmstudio_dest }}"
+      - "OpenCode: {{ dl_opencode_bin }}"

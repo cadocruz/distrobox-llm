@@ -14,6 +14,23 @@ dl_pacman_packages:
   - spirv-headers  # required to compile libggml-cuda-git (whisper.cpp-cuda dep)
   - vulkan-headers # same; both needed by ggml's Vulkan backend build
   - glslang        # GLSL → SPIR-V compiler, build dep of libggml-cuda-git
+  - fuse2          # Required to run AppImages (like LM Studio) inside the box
+  - nspr           # GUI/Electron dependency for LM Studio
+  - nss            # GUI/Electron dependency for LM Studio
+  - atk            # GUI/Electron dependency for LM Studio
+  - cups           # GUI/Electron dependency for LM Studio
+  - libdrm         # GUI/Electron dependency for LM Studio
+  - libxcomposite  # GUI/Electron dependency for LM Studio
+  - libxdamage     # GUI/Electron dependency for LM Studio
+  - libxrandr      # GUI/Electron dependency for LM Studio
+  - mesa           # GUI/Electron dependency for LM Studio
+  - alsa-lib       # GUI/Electron dependency for LM Studio
+  - pango          # GUI/Electron dependency for LM Studio
+  - cairo          # GUI/Electron dependency for LM Studio
+  - libxkbcommon   # GUI/Electron dependency for LM Studio
+  - gtk3           # GUI/Electron dependency for LM Studio
+
+
 
 # AUR packages (installed via yay; all binary-preferred variants).
 dl_aur_packages:

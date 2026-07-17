@@ -7,6 +7,11 @@
 
 dl_appimage_dir: "{{ dl_box_home }}/Apps"
 
-dl_lmstudio_version: "0.3.35-1"
+dl_lmstudio_version: "0.4.19-2"
 dl_lmstudio_url: "https://installers.lmstudio.ai/linux/x64/{{ dl_lmstudio_version }}/LM-Studio-{{ dl_lmstudio_version }}-x64.AppImage"
+dl_lmstudio_versioned_dest: "{{ dl_appimage_dir }}/LM-Studio-{{ dl_lmstudio_version }}-x64.AppImage"
 dl_lmstudio_dest: "{{ dl_appimage_dir }}/LM-Studio.AppImage"
+
+# OpenCode TUI Agent
+dl_opencode_bin: "{{ dl_box_home }}/.opencode/bin/opencode"
+dl_opencode_url: "https://opencode.ai/install"
